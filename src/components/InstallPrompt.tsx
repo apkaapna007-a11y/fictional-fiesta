@@ -12,26 +12,21 @@ const InstallPrompt = () => {
   const [isInstalled, setIsInstalled] = useState(false)
 
   useEffect(() => {
-    // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true)
       return
     }
 
-    // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
-      
-      // Don't show immediately - wait for user engagement
       setTimeout(() => {
         setShowPrompt(true)
-      }, 10000) // Show after 10 seconds
+      }, 10000)
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
 
-    // Listen for app installed event
     window.addEventListener('appinstalled', () => {
       setIsInstalled(true)
       setShowPrompt(false)
@@ -58,11 +53,9 @@ const InstallPrompt = () => {
 
   const handleDismiss = () => {
     setShowPrompt(false)
-    // Store dismissal in localStorage to not show again for 7 days
     localStorage.setItem('installPromptDismissed', Date.now().toString())
   }
 
-  // Check if dismissed recently
   useEffect(() => {
     const dismissed = localStorage.getItem('installPromptDismissed')
     if (dismissed) {
@@ -86,7 +79,6 @@ const InstallPrompt = () => {
         className="fixed bottom-20 left-4 right-4 md:left-auto md:right-8 md:w-96 z-50"
       >
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-warm-lg border border-warm-tan dark:border-gray-700 p-6">
-          {/* Icon */}
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-warm-amber to-warm-gold flex items-center justify-center flex-shrink-0">
               <span className="text-white text-2xl font-bold">N</span>
@@ -100,7 +92,6 @@ const InstallPrompt = () => {
                 Access pediatric knowledge instantly from your home screen. Works offline!
               </p>
 
-              {/* Actions */}
               <div className="flex gap-3">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -121,7 +112,6 @@ const InstallPrompt = () => {
               </div>
             </div>
 
-            {/* Close button */}
             <button
               onClick={handleDismiss}
               className="text-warm-muted hover:text-gray-900 dark:hover:text-warm-ivory text-xl leading-none"
