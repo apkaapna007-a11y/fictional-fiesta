@@ -1,11 +1,43 @@
 import { motion } from 'framer-motion'
-import { Chat } from '../store/chatStore'
+import { Chat, useChatStore, Message } from '../store/chatStore'
+import CitationBadge from './CitationBadge'
+import FollowUpSuggestions from './FollowUpSuggestions'
 
 interface ChatMessagesProps {
   chat: Chat
 }
 
 const ChatMessages = ({ chat }: ChatMessagesProps) => {
+  const { addMessage } = useChatStore()
+
+  const handleFollowUpClick = (suggestion: string) => {
+    const userMessage: Message = {
+      id: `msg-${Date.now()}`,
+      role: 'user',
+      content: suggestion,
+      timestamp: Date.now(),
+    }
+    addMessage(chat.id, userMessage)
+
+    // Simulate assistant response
+    setTimeout(() => {
+      const assistantMessage: Message = {
+        id: `msg-${Date.now()}-assistant`,
+        role: 'assistant',
+        content: `Based on your question about "${suggestion}", here's what the evidence shows...`,
+        timestamp: Date.now(),
+        citations: [
+          {
+            chapter: '25',
+            page: 1245,
+            text: 'Relevant pediatric information'
+          }
+        ]
+      }
+      addMessage(chat.id, assistantMessage)
+    }, 800)
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -43,10 +75,23 @@ const ChatMessages = ({ chat }: ChatMessagesProps) => {
                     : 'bg-white dark:bg-gray-700 border border-warm-tan dark:border-gray-600 text-gray-900 dark:text-warm-ivory'
                 }`}
               >
-                <p className="text-sm md:text-base">{message.content}</p>
+                <p className="text-sm md:text-base leading-relaxed">{message.content}</p>
+                {message.citations && message.citations.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1">
+                    {message.citations.map((citation) => (
+                      <div key={`${citation.chapter}-${citation.page}`}>
+                        <CitationBadge citation={citation} />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </motion.div>
           ))}
+
+          {chat.messages.length > 0 && chat.messages[chat.messages.length - 1].role === 'assistant' && (
+            <FollowUpSuggestions onSuggestionClick={handleFollowUpClick} />
+          )}
         </div>
       )}
     </motion.div>
