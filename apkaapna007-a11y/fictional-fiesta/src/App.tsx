@@ -3,6 +3,7 @@ import { useChatStore } from './store/chatStore'
 import SplashScreen from './components/SplashScreen'
 import WelcomeScreen from './components/WelcomeScreen'
 import ChatScreen from './components/ChatScreen'
+import InstallPrompt from './components/InstallPrompt'
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true)
@@ -23,6 +24,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-warm-ivory dark:bg-gray-950">
       {showWelcome ? <WelcomeScreen /> : <ChatScreen />}
+      <InstallPrompt />
     </div>
   )
 }
