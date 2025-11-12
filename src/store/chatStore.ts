@@ -29,6 +29,8 @@ interface ChatState {
   currentChatId: string | null
   showWelcome: boolean
   selectedMode: 'academic' | 'clinical'
+  currentScreen: 'chat' | 'history' | 'settings' | 'profile'
+  darkMode: boolean
   
   createChat: (mode: 'academic' | 'clinical') => string
   deleteChat: (chatId: string) => void
@@ -41,6 +43,8 @@ interface ChatState {
   
   setShowWelcome: (show: boolean) => void
   setSelectedMode: (mode: 'academic' | 'clinical') => void
+  setCurrentScreen: (screen: 'chat' | 'history' | 'settings' | 'profile') => void
+  setDarkMode: (enabled: boolean) => void
 }
 
 export const useChatStore = create<ChatState>()(
@@ -50,6 +54,8 @@ export const useChatStore = create<ChatState>()(
       currentChatId: null,
       showWelcome: true,
       selectedMode: 'academic',
+      currentScreen: 'chat',
+      darkMode: false,
       
       createChat: (mode: 'academic' | 'clinical') => {
         const chatId = `chat-${Date.now()}`
@@ -140,13 +146,22 @@ export const useChatStore = create<ChatState>()(
       setSelectedMode: (mode: 'academic' | 'clinical') => {
         set({ selectedMode: mode })
       },
+      
+      setCurrentScreen: (screen: 'chat' | 'history' | 'settings' | 'profile') => {
+        set({ currentScreen: screen })
+      },
+      
+      setDarkMode: (enabled: boolean) => {
+        set({ darkMode: enabled })
+      },
     }),
     {
       name: 'nelson-gpt-storage',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         chats: state.chats.slice(0, 5),
-        selectedMode: state.selectedMode
+        selectedMode: state.selectedMode,
+        darkMode: state.darkMode
       })
     }
   )

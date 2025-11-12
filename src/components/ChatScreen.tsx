@@ -3,8 +3,13 @@ import { useChatStore } from '../store/chatStore'
 import ChatHeader from './ChatHeader'
 import ChatMessages from './ChatMessages'
 import ChatInput from './ChatInput'
+import HistoryScreen from './HistoryScreen'
+import SettingsScreen from './SettingsScreen'
+import ProfileScreen from './ProfileScreen'
+import BottomTabNavigation from './BottomTabNavigation'
 
-const ChatScreen = () => {
+const ChatScreenMain = () => {
+  const { currentScreen, darkMode } = useChatStore()
   const currentChat = useChatStore((state) => state.getCurrentChat())
 
   if (!currentChat) {
@@ -31,6 +36,21 @@ const ChatScreen = () => {
       {/* Input Dock */}
       <ChatInput chatId={currentChat.id} mode={currentChat.mode} />
     </motion.div>
+  )
+}
+
+const ChatScreen = () => {
+  const { currentScreen } = useChatStore()
+
+  return (
+    <div className="min-h-screen bg-warm-ivory dark:bg-gray-950 flex flex-col">
+      {currentScreen === 'chat' && <ChatScreenMain />}
+      {currentScreen === 'history' && <HistoryScreen />}
+      {currentScreen === 'settings' && <SettingsScreen />}
+      {currentScreen === 'profile' && <ProfileScreen />}
+
+      <BottomTabNavigation />
+    </div>
   )
 }
 

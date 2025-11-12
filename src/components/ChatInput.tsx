@@ -33,16 +33,23 @@ const ChatInput = ({ chatId, mode }: ChatInputProps) => {
       }
       addMessage(chatId, userMessage)
 
-      // Simulate assistant response
+      // Simulate assistant response with citations
       setTimeout(() => {
         const assistantMessage: Message = {
           id: `msg-${Date.now()}-assistant`,
           role: 'assistant',
           content:
             mode === 'academic'
-              ? 'Based on the Nelson Textbook of Pediatrics, here is an evidence-based explanation...'
-              : 'From a clinical perspective, I would recommend the following approach...',
+              ? 'Based on the Nelson Textbook of Pediatrics, here is an evidence-based explanation regarding your question...'
+              : 'From a clinical perspective, I would recommend the following approach to address your concern...',
           timestamp: Date.now(),
+          citations: [
+            {
+              chapter: '23',
+              page: 1150,
+              text: 'Evidence-based pediatric guidance'
+            }
+          ]
         }
         addMessage(chatId, assistantMessage)
       }, 800)
@@ -62,7 +69,7 @@ const ChatInput = ({ chatId, mode }: ChatInputProps) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="border-t border-warm-tan dark:border-gray-700 bg-white dark:bg-gray-800 sticky bottom-0"
+      className="border-t border-warm-tan dark:border-gray-700 bg-white dark:bg-gray-800 sticky bottom-20"
     >
       <div className="max-w-4xl mx-auto px-4 py-4">
         {/* Mode Indicator */}
