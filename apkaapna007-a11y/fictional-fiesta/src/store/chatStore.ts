@@ -46,99 +46,112 @@ interface ChatState {
   setSelectedMode: (mode: 'academic' | 'clinical') => void
 }
 
-export const useChatStore = create<ChatState>((set, get) => ({
-  chats: [],
-  currentChatId: null,
-  showWelcome: true,
-  selectedMode: 'academic',
-  
-  createChat: (mode: 'academic' | 'clinical') => {
-    const chatId = `chat-${Date.now()}`
-    const newChat: Chat = {
-      id: chatId,
-      title: 'Untitled',
-      messages: [],
-      mode,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+export const useChatStore = create<ChatState>()(
+  persist(
+    (set, get) => ({
+      chats: [],
+      currentChatId: null,
+      showWelcome: true,
+      selectedMode: 'academic',
+      
+      createChat: (mode: 'academic' | 'clinical') => {
+        const chatId = `chat-${Date.now()}`
+        const newChat: Chat = {
+          id: chatId,
+          title: 'Untitled',
+          messages: [],
+          mode,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        }
+        set((state) => ({
+          chats: [newChat, ...state.chats],
+          currentChatId: chatId,
+          showWelcome: false,
+        }))
+        return chatId
+      },
+      
+      deleteChat: (chatId: string) => {
+        set((state) => ({
+          chats: state.chats.filter((chat) => chat.id !== chatId),
+          currentChatId: state.currentChatId === chatId ? null : state.currentChatId,
+          showWelcome: state.currentChatId === chatId,
+        }))
+      },
+      
+      renameChat: (chatId: string, title: string) => {
+        set((state) => ({
+          chats: state.chats.map((chat) =>
+            chat.id === chatId
+              ? { ...chat, title, updatedAt: Date.now() }
+              : chat
+          ),
+        }))
+      },
+      
+      setCurrentChat: (chatId: string) => {
+        set({ currentChatId: chatId, showWelcome: false })
+      },
+      
+      getCurrentChat: () => {
+        const state = get()
+        return state.currentChatId
+          ? state.chats.find((chat) => chat.id === state.currentChatId) || null
+          : null
+      },
+      
+      addMessage: (chatId: string, message: Message) => {
+        set((state) => ({
+          chats: state.chats.map((chat) =>
+            chat.id === chatId
+              ? {
+                  ...chat,
+                  messages: [...chat.messages, message],
+                  title: chat.messages.length === 0
+                    ? message.content.split('\n')[0].slice(0, 50)
+                    : chat.title,
+                  updatedAt: Date.now(),
+                }
+              : chat
+          ),
+        }))
+      },
+      
+      updateMessage: (chatId: string, messageId: string, content: string) => {
+        set((state) => ({
+          chats: state.chats.map((chat) =>
+            chat.id === chatId
+              ? {
+                  ...chat,
+                  messages: chat.messages.map((msg) =>
+                    msg.id === messageId
+                      ? { ...msg, content, timestamp: Date.now() }
+                      : msg
+                  ),
+                  updatedAt: Date.now(),
+                }
+              : chat
+          ),
+        }))
+      },
+      
+      setShowWelcome: (show: boolean) => {
+        set({ showWelcome: show })
+      },
+      
+      setSelectedMode: (mode: 'academic' | 'clinical') => {
+        set({ selectedMode: mode })
+      },
+    }),
+    {
+      name: 'nelson-gpt-storage',
+      storage: createJSONStorage(() => localStorage),
+      // Only persist the last 5 chats and selected mode for offline access
+      partialize: (state) => ({
+        chats: state.chats.slice(0, 5), // Keep only the 5 most recent chats
+        selectedMode: state.selectedMode
+      })
     }
-    set((state) => ({
-      chats: [newChat, ...state.chats],
-      currentChatId: chatId,
-      showWelcome: false,
-    }))
-    return chatId
-  },
-  
-  deleteChat: (chatId: string) => {
-    set((state) => ({
-      chats: state.chats.filter((chat) => chat.id !== chatId),
-      currentChatId: state.currentChatId === chatId ? null : state.currentChatId,
-      showWelcome: state.currentChatId === chatId,
-    }))
-  },
-  
-  renameChat: (chatId: string, title: string) => {
-    set((state) => ({
-      chats: state.chats.map((chat) =>
-        chat.id === chatId
-          ? { ...chat, title, updatedAt: Date.now() }
-          : chat
-      ),
-    }))
-  },
-  
-  setCurrentChat: (chatId: string) => {
-    set({ currentChatId: chatId, showWelcome: false })
-  },
-  
-  getCurrentChat: () => {
-    const state = get()
-    return state.currentChatId
-      ? state.chats.find((chat) => chat.id === state.currentChatId) || null
-      : null
-  },
-  
-  addMessage: (chatId: string, message: Message) => {
-    set((state) => ({
-      chats: state.chats.map((chat) =>
-        chat.id === chatId
-          ? {
-              ...chat,
-              messages: [...chat.messages, message],
-              title: chat.messages.length === 0
-                ? message.content.split('\n')[0].slice(0, 50)
-                : chat.title,
-              updatedAt: Date.now(),
-            }
-          : chat
-      ),
-    }))
-  },
-  
-  updateMessage: (chatId: string, messageId: string, content: string) => {
-    set((state) => ({
-      chats: state.chats.map((chat) =>
-        chat.id === chatId
-          ? {
-              ...chat,
-              messages: chat.messages.map((msg) =>
-                msg.id === messageId
-                  ? { ...msg, content, timestamp: Date.now() }
-                  : msg
-              ),
-              updatedAt: Date.now(),
-            }
-          : chat
-      ),
-    }))
-  },
-  
-  setShowWelcome: (show: boolean) => {
-    set({ showWelcome: show })
-  },
-  
-  setSelectedMode: (mode: 'academic' | 'clinical') => {
-    set({ selectedMode: mode })
-  },
-}))
+  )
+)
